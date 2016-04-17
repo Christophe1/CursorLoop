@@ -11,70 +11,131 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MainActivity extends Activity {
 
-    Cursor phones;
-    Cursor phonestwo;
-    Cursor cur;
+
+    Cursor cursor;
+    ListView mainListView;
+    ArrayList hashMapsArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (cursor != null) {
+            cursor.moveToFirst();}
+        try {
 
+            cursor = getApplicationContext().getContentResolver()
+                    .query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+            int Idx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
+            int nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+
+            int phoneNumberIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            int photoIdIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI);
+            cursor.moveToFirst();
+
+
+            Set<String> ids = new HashSet<>();
+            do {
+                System.out.println("=====>in while");
+                String contactid=cursor.getString(Idx);
+                if (!ids.contains(contactid)) {
+                    ids.add(contactid);
+                    HashMap<String, String> hashMap = new HashMap<String, String>();
+                   String  name = cursor.getString(nameIdx);
+                    String phoneNumber = cursor.getString(phoneNumberIdx);
+                    String image = cursor.getString(photoIdIdx);
+                    System.out.println("Id--->"+contactid+"Name--->"+name);
+                    System.out.println("Id--->"+contactid+"Name--->"+name);
+                    System.out.println("Id--->"+contactid+"Number--->"+phoneNumber);
+
+                    if (!phoneNumber.contains("*")) {
+                        hashMap.put("contactid", "" + contactid);
+                        hashMap.put("name", "" + name);
+                        hashMap.put("phoneNumber", "" + phoneNumber);
+                        hashMap.put("image", "" + image);
+                        // hashMap.put("email", ""+email);
+                        if (hashMapsArrayList != null) {
+                            hashMapsArrayList.add(hashMap);}
+//                    hashMapsArrayList.add(hashMap);
+                    }
+                }
+
+            } while (cursor.moveToNext());
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+
+//*************************16/04/2016**********************************************************
 //
 //  Find contact based on name.
 //
-        ContentResolver cr = getContentResolver();
-
-
-//        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null,
-//                null, null, null);
-        if (cur != null) {
-            cur.moveToFirst();}
-        // this query only return contacts with phone number and is not duplicated
-         cur = getContentResolver().query(
-//                the table to query
-                ContactsContract.Contacts.CONTENT_URI,
-//                the columns to return
-                null,
-//               selection criteria :
-// we only want contacts that have a name and a phone number. If they have a phone number, the value is 1 (if not, it is 0)
-                ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '" + ("1") + "'" + " AND " + ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1",
-//               selection criteria
-                null,
-//                display in ascending order
-                ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
-
-
-        if (cur.getCount() > 0) {
-            cur.moveToFirst();
-            while (cur.moveToNext()) {
-                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                Log.e("cursor total", "" + cur.getCount());
-                Log.i("id", id);
-                Log.i("Name", name);
-
-//                if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0)
-//                {
-                    // Query phone here. Covered next
-//                    phones.moveToFirst();
-                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ id,null, null);
-                    while (phones.moveToNext()) {
-                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        Log.i("Number", phoneNumber);
-                    }
-                    phones.close();
-//                }
-
-            }
-        }
+//        ContentResolver cr = getContentResolver();
 //
+//
+////        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null,
+////                null, null, null);
+//        if (cur != null) {
+//            cur.moveToFirst();}
+//        // this query only return contacts with phone number and is not duplicated
+//         cur = getContentResolver().query(
+////                the table to query
+//                ContactsContract.Contacts.CONTENT_URI,
+////                the columns to return
+//                null,
+////               selection criteria :
+//// we only want contacts that have a name and a phone number. If they have a phone number, the value is 1 (if not, it is 0)
+//                ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '" + ("1") + "'" + " AND " + ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1",
+////               selection criteria
+//                null,
+////                display in ascending order
+//                ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC");
+//
+//
+//        if (cur.getCount() > 0) {
+//            cur.moveToFirst();
+//            while (cur.moveToNext()) {
+//                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
+//                String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//                Log.e("cursor total", "" + cur.getCount());
+//                Log.i("id", id);
+//                Log.i("Name", name);
+//
+////                if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0)
+////                {
+//                    // Query phone here. Covered next
+////                    phones.moveToFirst();
+//                    Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ id,null, null);
+//                    while (phones.moveToNext()) {
+//                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//                        Log.i("Number", phoneNumber);
+//                    }
+//                    phones.close();
+////                }
+//
+//            }
+//        }
+//*******************************************************************************
 ////        phones.moveToFirst();
 //        phones = getContentResolver().query(
 ////                the table to query
